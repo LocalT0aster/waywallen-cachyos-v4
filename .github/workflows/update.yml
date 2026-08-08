@@ -18,7 +18,11 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - run: ./ci/setup-cachyos-repositories.sh
       - run: pacman -S --noconfirm --needed git github-cli sudo
-      - run: git submodule update --init --recursive
+      - run: ./ci/checkout-repository.sh
+      - name: Authorize the update checkout
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
       - run: ./scripts/update-upstreams.sh
       - run: ./scripts/update-pkgbuilds.sh
       - run: |

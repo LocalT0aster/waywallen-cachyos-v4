@@ -25,7 +25,7 @@ jobs:
           ref: main
       - run: ./ci/setup-cachyos-repositories.sh
       - run: pacman -S --noconfirm --needed git sudo
-      - run: git submodule update --init --recursive
+      - run: ./ci/checkout-repository.sh
       - name: Import package signing key
         env:
           PACKAGER_GPG_PRIVATE_KEY: ${{ secrets.PACKAGER_GPG_PRIVATE_KEY }}
