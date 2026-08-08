@@ -1,0 +1,46 @@
+name: Publish pacman repository
+
+on:
+  workflow_run:
+    workflows: [Update upstream releases]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  publish:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04
+    container: archlinux:base-devel
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          submodules: recursive
+      - run: ./ci/setup-cachyos-repositories.sh
+      - run: pacman -S --noconfirm --needed git sudo
+      - name: Import package signing key
+        env:
+          PACKAGER_GPG_PRIVATE_KEY: ${{ secrets.PACKAGER_GPG_PRIVATE_KEY }}
+        run: |
+          useradd --create-home builder
+          install -d -m 700 /home/builder/.gnupg
+          chown -R builder:builder /home/builder/.gnupg
+          printf '%s' "$PACKAGER_GPG_PRIVATE_KEY" | su builder -c 'gpg --batch --import'
+      - run: |
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
+          chmod 440 /etc/sudoers.d/builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+          su builder -c 'cd "$GITHUB_WORKSPACE" && ./scripts/build-repository.sh'
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - id: deployment
+        uses: actions/deploy-pages@v4

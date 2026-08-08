@@ -1,0 +1,40 @@
+# Maintainer: LocalT0aster <90502400+LocalT0aster@users.noreply.github.com>
+
+pkgname=waywallen-open-wallpaper-engine
+pkgver=0.2.2
+pkgrel=1
+pkgdesc='Wallpaper Engine renderer plugin for waywallen, optimized for CachyOS x86-64-v4'
+arch=('x86_64')
+url='https://github.com/waywallen/open-wallpaper-engine'
+license=('GPL-2.0-only')
+depends=('ffmpeg' 'glibc' 'libglvnd' 'mesa' 'vulkan-icd-loader' 'waywallen>=0.3.1')
+makedepends=('clang' 'cmake>=4.3.1' 'git' 'lld' 'ninja' 'pkgconf' 'vulkan-headers')
+source=("open-wallpaper-engine-${pkgver}.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=('62ec0c014b4ab6d3c136c46f1fbbc7b6891bcff3e9e0013435498b9f03bee297')
+
+build() {
+  # CEF's wrapper target and C++ modules must share a compatible hardening profile.
+  export CFLAGS="${CFLAGS/-Wp,-D_FORTIFY_SOURCE=3/}"
+  export CXXFLAGS="${CXXFLAGS/-Wp,-D_FORTIFY_SOURCE=3/}"
+  export CPPFLAGS="${CPPFLAGS/-D_FORTIFY_SOURCE=3/}"
+  export CFLAGS="${CFLAGS} -march=x86-64-v4"
+  export CXXFLAGS="${CXXFLAGS} -march=x86-64-v4"
+
+  cmake -S "open-wallpaper-engine-${pkgver}" -B build -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_C_COMPILER=clang \
+    -DCMAKE_CXX_COMPILER=clang++ \
+    -DCMAKE_LINKER_TYPE=LLD \
+    -DBUILD_TESTS=OFF \
+    -DBUILD_VIEWER=OFF \
+    -DBUILD_WAYWALLEN=ON \
+    -DBUILD_WESCENE=ON \
+    -DBUILD_WEWEB=ON
+  cmake --build build
+}
+
+package() {
+  DESTDIR="${pkgdir}" cmake --install build
+  install -Dm644 "open-wallpaper-engine-${pkgver}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

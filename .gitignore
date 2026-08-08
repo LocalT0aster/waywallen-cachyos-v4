@@ -1,0 +1,10 @@
+*.pkg.tar.*
+*.pkg.tar.*.sig
+*.db*
+*.files*
+pkg/
+src/
+build/
+dist/
+.cache/
+packages/*/*.tar.*

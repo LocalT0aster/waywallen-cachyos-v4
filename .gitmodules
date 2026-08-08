@@ -1,0 +1,9 @@
+[submodule "upstream/waywallen"]
+	path = upstream/waywallen
+	url = https://github.com/waywallen/waywallen.git
+[submodule "upstream/waywallen-display"]
+	path = upstream/waywallen-display
+	url = https://github.com/waywallen/waywallen-display.git
+[submodule "upstream/open-wallpaper-engine"]
+	path = upstream/open-wallpaper-engine
+	url = https://github.com/waywallen/open-wallpaper-engine.git

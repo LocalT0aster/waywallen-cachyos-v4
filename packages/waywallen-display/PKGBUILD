@@ -1,0 +1,34 @@
+# Maintainer: LocalT0aster <90502400+LocalT0aster@users.noreply.github.com>
+
+pkgname=waywallen-display
+pkgver=0.3.1
+pkgrel=1
+pkgdesc='Desktop integration for waywallen, optimized for CachyOS x86-64-v4'
+arch=('x86_64')
+url='https://github.com/waywallen/waywallen-display'
+license=('MIT')
+depends=('glibc' 'libglvnd' 'vulkan-icd-loader' 'wayland')
+makedepends=('cargo' 'cmake' 'gettext' 'glib2' 'gobject-introspection' 'gtk4' 'ninja' 'pkgconf' 'qt6-base' 'qt6-declarative' 'vulkan-headers')
+optdepends=('qt6-declarative: KDE Plasma integration' 'gtk4: GNOME Shell integration')
+source=("${pkgname}-${pkgver}.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=('08439e8990da002f2a6d781edfe6b16aabd2025e6e8fb39f32200f33a788efc9')
+
+build() {
+  export CFLAGS="${CFLAGS} -march=x86-64-v4"
+  export CXXFLAGS="${CXXFLAGS} -march=x86-64-v4"
+  export RUSTFLAGS="${RUSTFLAGS:+${RUSTFLAGS} }-C target-cpu=x86-64-v4"
+
+  cmake -S "${pkgname}-${pkgver}" -B build -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DWAYWALLEN_DISPLAY_PLUGIN_QML=ON \
+    -DWAYWALLEN_DISPLAY_PLUGIN_GOBJECT=ON
+  cmake --build build
+  cargo build --manifest-path "${pkgname}-${pkgver}/Cargo.toml" --bin waywallen-layer-shell --release --locked
+}
+
+package() {
+  DESTDIR="${pkgdir}" cmake --install build
+  install -Dm755 "${pkgname}-${pkgver}/target/release/waywallen-layer-shell" "${pkgdir}/usr/bin/waywallen-layer-shell"
+  install -Dm644 "${pkgname}-${pkgver}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

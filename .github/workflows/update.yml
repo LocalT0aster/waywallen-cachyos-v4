@@ -1,0 +1,44 @@
+name: Update upstream releases
+
+on:
+  schedule:
+    - cron: '23 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-24.04
+    container: archlinux:base-devel
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          submodules: recursive
+      - run: ./ci/setup-cachyos-repositories.sh
+      - run: pacman -S --noconfirm --needed git github-cli sudo
+      - run: ./scripts/update-upstreams.sh
+      - run: ./scripts/update-pkgbuilds.sh
+      - run: |
+          useradd --create-home builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
+          chmod 440 /etc/sudoers.d/builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+      - name: Import package signing key
+        env:
+          PACKAGER_GPG_PRIVATE_KEY: ${{ secrets.PACKAGER_GPG_PRIVATE_KEY }}
+        run: |
+          install -d -m 700 /home/builder/.gnupg
+          chown builder:builder /home/builder/.gnupg
+          printf '%s' "$PACKAGER_GPG_PRIVATE_KEY" | su builder -c 'gpg --batch --import'
+      - run: |
+          su builder -c 'cd "$GITHUB_WORKSPACE" && ./scripts/build-repository.sh'
+      - name: Commit validated release updates
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add .gitmodules upstream packages
+          git diff --cached --quiet || git commit -m 'chore: update upstream package releases'
+          git push

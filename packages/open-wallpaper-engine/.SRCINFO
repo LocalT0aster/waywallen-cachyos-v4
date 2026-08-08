@@ -1,0 +1,24 @@
+pkgbase = waywallen-open-wallpaper-engine
+	pkgdesc = Wallpaper Engine renderer plugin for waywallen, optimized for CachyOS x86-64-v4
+	pkgver = 0.2.2
+	pkgrel = 1
+	url = https://github.com/waywallen/open-wallpaper-engine
+	arch = x86_64
+	license = GPL-2.0-only
+	makedepends = clang
+	makedepends = cmake>=4.3.1
+	makedepends = git
+	makedepends = lld
+	makedepends = ninja
+	makedepends = pkgconf
+	makedepends = vulkan-headers
+	depends = ffmpeg
+	depends = glibc
+	depends = libglvnd
+	depends = mesa
+	depends = vulkan-icd-loader
+	depends = waywallen>=0.3.1
+	source = open-wallpaper-engine-0.2.2.tar.gz::https://github.com/waywallen/open-wallpaper-engine/archive/refs/tags/v0.2.2.tar.gz
+	sha256sums = 62ec0c014b4ab6d3c136c46f1fbbc7b6891bcff3e9e0013435498b9f03bee297
+
+pkgname = waywallen-open-wallpaper-engine

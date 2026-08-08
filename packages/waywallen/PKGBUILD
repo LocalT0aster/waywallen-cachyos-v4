@@ -1,0 +1,33 @@
+# Maintainer: LocalT0aster <90502400+LocalT0aster@users.noreply.github.com>
+
+pkgname=waywallen
+pkgver=0.3.1
+pkgrel=1
+pkgdesc='Wallpaper manager for Linux, optimized for CachyOS x86-64-v4'
+arch=('x86_64')
+url='https://github.com/waywallen/waywallen'
+license=('MIT')
+depends=('ffmpeg' 'glibc' 'libglvnd' 'libxkbcommon' 'mesa' 'qt6-base' 'qt6-declarative' 'qt6-grpc' 'qt6-websockets' 'sqlite' 'vulkan-icd-loader' 'zstd')
+makedepends=('cargo' 'clang' 'cmake>=4.3.1' 'corrosion' 'git' 'git-lfs' 'lld' 'ninja' 'pkgconf' 'qt6-shadertools' 'vulkan-headers' 'vulkan-memory-allocator')
+optdepends=('waywallen-display: desktop integration clients')
+source=("${pkgname}-${pkgver}.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=('078454a1c7834ab009e51cd382ee0084e1830ad41d1711e985656c4427e83a6c')
+
+build() {
+  export CFLAGS="${CFLAGS} -march=x86-64-v4"
+  export CXXFLAGS="${CXXFLAGS} -march=x86-64-v4"
+  export RUSTFLAGS="${RUSTFLAGS:+${RUSTFLAGS} }-C target-cpu=x86-64-v4"
+
+  cmake -S "${pkgname}-${pkgver}" -B build -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_C_COMPILER=clang \
+    -DCMAKE_CXX_COMPILER=clang++ \
+    -DCMAKE_LINKER_TYPE=LLD
+  cmake --build build
+}
+
+package() {
+  DESTDIR="${pkgdir}" cmake --install build
+  install -Dm644 "${pkgname}-${pkgver}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
