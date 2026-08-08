@@ -15,10 +15,9 @@ jobs:
     container: archlinux:base-devel
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
       - run: ./ci/setup-cachyos-repositories.sh
       - run: pacman -S --noconfirm --needed git github-cli
+      - run: git submodule update --init --recursive
       - id: runner
         run: ./scripts/check-v4-runner.sh
       - name: Verify package sources and metadata
