@@ -18,11 +18,24 @@ jobs:
       - run: ./ci/setup-cachyos-repositories.sh
       - run: pacman -S --noconfirm --needed git github-cli
       - run: ./ci/checkout-repository.sh
-      - id: runner
-        run: ./scripts/check-v4-runner.sh
       - name: Create package build user
         run: |
           useradd --create-home builder
+          install -d -o builder -g builder /home/builder/.cargo
+      - name: Restore package build caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            /var/cache/pacman/pkg
+            /home/builder/.cargo/registry
+            /home/builder/.cargo/git
+          key: cachyos-v4-build-${{ hashFiles('packages/**/PKGBUILD', '.gitmodules') }}
+          restore-keys: |
+            cachyos-v4-build-
+      - id: runner
+        run: ./scripts/check-v4-runner.sh
+      - name: Authorize package build user
+        run: |
           echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
           chmod 440 /etc/sudoers.d/builder
           chown -R builder:builder "$GITHUB_WORKSPACE"
