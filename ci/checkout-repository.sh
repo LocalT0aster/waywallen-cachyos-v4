@@ -10,3 +10,6 @@ git remote add origin "https://github.com/${repository}.git"
 git fetch --depth=1 origin "$branch"
 git checkout --force -B "$branch" FETCH_HEAD
 git submodule update --init --recursive
+for submodule in upstream/*; do
+  git config --global --add safe.directory "$PWD/$submodule"
+done

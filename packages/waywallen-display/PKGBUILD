@@ -14,6 +14,12 @@ source=("${pkgname}-${pkgver}.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz
 sha256sums=('08439e8990da002f2a6d781edfe6b16aabd2025e6e8fb39f32200f33a788efc9')
 
 build() {
+  export CFLAGS="${CFLAGS//-Wp,-D_FORTIFY_SOURCE=3/}"
+  export CXXFLAGS="${CXXFLAGS//-Wp,-D_FORTIFY_SOURCE=3/}"
+  export CPPFLAGS="${CPPFLAGS//-D_FORTIFY_SOURCE=3/}"
+  export CFLAGS="${CFLAGS//-flto=auto/}"
+  export CXXFLAGS="${CXXFLAGS//-flto=auto/}"
+  export LDFLAGS="${LDFLAGS//-flto=auto/}"
   export CFLAGS="${CFLAGS} -march=x86-64-v4"
   export CXXFLAGS="${CXXFLAGS} -march=x86-64-v4"
   export RUSTFLAGS="${RUSTFLAGS:+${RUSTFLAGS} }-C target-cpu=x86-64-v4"

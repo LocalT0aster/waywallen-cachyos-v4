@@ -14,6 +14,13 @@ source=("${pkgname}-${pkgver}.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz
 sha256sums=('078454a1c7834ab009e51cd382ee0084e1830ad41d1711e985656c4427e83a6c')
 
 build() {
+  # GCC LTO objects and Clang/C++ modules cannot be linked together reliably.
+  export CFLAGS="${CFLAGS//-Wp,-D_FORTIFY_SOURCE=3/}"
+  export CXXFLAGS="${CXXFLAGS//-Wp,-D_FORTIFY_SOURCE=3/}"
+  export CPPFLAGS="${CPPFLAGS//-D_FORTIFY_SOURCE=3/}"
+  export CFLAGS="${CFLAGS//-flto=auto/}"
+  export CXXFLAGS="${CXXFLAGS//-flto=auto/}"
+  export LDFLAGS="${LDFLAGS//-flto=auto/}"
   export CFLAGS="${CFLAGS} -march=x86-64-v4"
   export CXXFLAGS="${CXXFLAGS} -march=x86-64-v4"
   export RUSTFLAGS="${RUSTFLAGS:+${RUSTFLAGS} }-C target-cpu=x86-64-v4"
