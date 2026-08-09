@@ -13,15 +13,23 @@ for package in waywallen waywallen-display open-wallpaper-engine; do
       makepkg_args+=(--sign)
     fi
     makepkg "${makepkg_args[@]}"
-    install -Dm644 ./*.pkg.tar.zst "$output/"
+    package_files=()
+    while IFS= read -r package_file; do
+      [[ $package_file == *-debug-*.pkg.tar.zst ]] && continue
+      package_files+=("$package_file")
+    done < <(makepkg --packagelist)
+    ((${#package_files[@]})) || { printf 'No installable package was produced.\n' >&2; exit 1; }
+
+    install -Dm644 "${package_files[@]}" "$output/"
     if [[ ${SIGN_PACKAGES:-1} == 1 ]]; then
-      install -Dm644 ./*.pkg.tar.zst.sig "$output/"
+      for package_file in "${package_files[@]}"; do
+        install -Dm644 "${package_file}.sig" "$output/"
+      done
     fi
-    package_file=$(printf '%s\n' ./*.pkg.tar.zst)
     if command -v sudo >/dev/null; then
-      sudo pacman -U --noconfirm "$package_file"
+      sudo pacman -U --noconfirm "${package_files[@]}"
     else
-      pacman -U --noconfirm "$package_file"
+      pacman -U --noconfirm "${package_files[@]}"
     fi
   )
 done
