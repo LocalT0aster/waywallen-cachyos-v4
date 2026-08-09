@@ -23,7 +23,8 @@ jobs:
           useradd --create-home builder
           install -d -o builder -g builder /home/builder/.cargo
       - name: Restore package build caches
-        uses: actions/cache@v4
+        id: package-cache
+        uses: actions/cache/restore@v4
         with:
           path: |
             /var/cache/pacman/pkg
@@ -49,3 +50,12 @@ jobs:
       - name: Run v4 executable tests
         if: steps.runner.outputs.v4_supported == 'true'
         run: ./scripts/test-v4-packages.sh
+      - name: Save package build caches
+        if: always() && steps.package-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            /var/cache/pacman/pkg
+            /home/builder/.cargo/registry
+            /home/builder/.cargo/git
+          key: ${{ steps.package-cache.outputs.cache-primary-key }}
