@@ -53,6 +53,7 @@ jobs:
           install -d -m 700 /home/builder/.gnupg
           chown builder:builder /home/builder/.gnupg
           printf '%s' "$PACKAGER_GPG_PRIVATE_KEY" | su builder -c 'gpg --batch --import'
+          su builder -c 'gpg --batch --with-colons --list-secret-keys 9EB061F8BA4ACE8D2AF6AC70CB133F037BD453CA | grep -q "^sec:"'
       - run: |
           su builder -c 'cd "$GITHUB_WORKSPACE" && ./scripts/build-repository.sh'
       - name: Commit validated release updates
