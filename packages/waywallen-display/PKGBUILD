@@ -3,7 +3,7 @@
 pkgname=waywallen-display
 pkgver=0.3.1
 pkgrel=1
-pkgdesc='Desktop integration for waywallen, optimized for CachyOS x86-64-v4'
+pkgdesc='Desktop integration for waywallen'
 arch=('x86_64')
 url='https://github.com/waywallen/waywallen-display'
 license=('MIT')
@@ -20,10 +20,6 @@ build() {
   export CFLAGS="${CFLAGS//-flto=auto/}"
   export CXXFLAGS="${CXXFLAGS//-flto=auto/}"
   export LDFLAGS="${LDFLAGS//-flto=auto/}"
-  export CFLAGS="${CFLAGS} -march=x86-64-v4"
-  export CXXFLAGS="${CXXFLAGS} -march=x86-64-v4"
-  export RUSTFLAGS="${RUSTFLAGS:+${RUSTFLAGS} }-C target-cpu=x86-64-v4"
-
   cmake -S "${pkgname}-${pkgver}" -B build -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/usr \

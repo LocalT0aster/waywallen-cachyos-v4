@@ -1,8 +1,8 @@
-# Waywallen CachyOS v4 packages
+# Waywallen Arch packages
 
-Source-built, `x86-64-v4`-optimized Arch packages for the Waywallen stack.
-The monorepo pins upstream releases as Git submodules and publishes signed
-`x86_64` packages to GitHub Pages.
+Source-built generic `x86_64` Arch packages for the Waywallen stack. The
+monorepo pins upstream releases as Git submodules and publishes signed packages
+to GitHub Pages.
 
 ## Packages
 
@@ -19,21 +19,15 @@ Import the repository key and configure pacman after GitHub Pages has been
 enabled for this repository:
 
 ```sh
-sudo pacman-key --add keys/waywallen-cachyos-v4.asc
-sudo pacman-key --lsign-key 9EB061F8BA4ACE8D2AF6AC70CB133F037BD453CA
+sudo pacman-key --add keys/waywallen-packages.asc
+sudo pacman-key --lsign-key B075783531075AA59D4911C7448DCEC4307C77A0
 ```
 
-Add this repository above CachyOS repositories in `/etc/pacman.conf`:
+Add this repository to `/etc/pacman.conf`:
 
 ```ini
-[waywallen-cachyos-v4]
-Server = https://localt0aster.github.io/waywallen-cachyos-v4/x86_64
-```
-
-The packages require an `x86-64-v4` CPU. Confirm support before installing:
-
-```sh
-/lib/ld-linux-x86-64.so.2 --help | grep 'x86-64-v4 (supported'
+[waywallen]
+Server = https://localt0aster.github.io/waywallen-pkgbuilds/x86_64
 ```
 
 ## Local maintenance
@@ -50,19 +44,15 @@ the just-built dependency packages through `sudo pacman -U`.
 
 ## CI signing setup
 
-The signing fingerprint is `9EB061F8BA4ACE8D2AF6AC70CB133F037BD453CA`.
+The signing fingerprint is `B075783531075AA59D4911C7448DCEC4307C77A0`.
 Export the private key locally, then add its armored content as the
 `PACKAGER_GPG_PRIVATE_KEY` GitHub Actions secret:
 
 ```sh
-gpg --armor --export-secret-keys 9EB061F8BA4ACE8D2AF6AC70CB133F037BD453CA
+gpg --armor --export-secret-keys B075783531075AA59D4911C7448DCEC4307C77A0
 ```
 
 Enable GitHub Pages with GitHub Actions as the source before dispatching the
 `Publish pacman repository` workflow. The private key is never committed.
 
-## Runner safety
-
-CI always compiles `x86-64-v4` packages. It checks the dynamic loader's CPU
-capability report before executing a built binary and skips executable tests on
-runners that do not advertise v4 support.
+CI builds and runs smoke tests on standard GitHub-hosted x86_64 runners.

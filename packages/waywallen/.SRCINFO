@@ -1,5 +1,5 @@
 pkgbase = waywallen
-	pkgdesc = Wallpaper manager for Linux, optimized for CachyOS x86-64-v4
+	pkgdesc = Wallpaper manager for Linux
 	pkgver = 0.3.1
 	pkgrel = 1
 	url = https://github.com/waywallen/waywallen

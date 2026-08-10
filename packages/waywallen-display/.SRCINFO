@@ -1,5 +1,5 @@
 pkgbase = waywallen-display
-	pkgdesc = Desktop integration for waywallen, optimized for CachyOS x86-64-v4
+	pkgdesc = Desktop integration for waywallen
 	pkgver = 0.3.1
 	pkgrel = 1
 	url = https://github.com/waywallen/waywallen-display

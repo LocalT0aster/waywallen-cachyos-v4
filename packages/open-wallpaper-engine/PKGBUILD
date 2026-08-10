@@ -3,7 +3,7 @@
 pkgname=waywallen-open-wallpaper-engine
 pkgver=0.2.2
 pkgrel=1
-pkgdesc='Wallpaper Engine renderer plugin for waywallen, optimized for CachyOS x86-64-v4'
+pkgdesc='Wallpaper Engine renderer plugin for waywallen'
 arch=('x86_64')
 url='https://github.com/waywallen/open-wallpaper-engine'
 license=('GPL-2.0-only')
@@ -20,9 +20,6 @@ build() {
   export CFLAGS="${CFLAGS//-flto=auto/}"
   export CXXFLAGS="${CXXFLAGS//-flto=auto/}"
   export LDFLAGS="${LDFLAGS//-flto=auto/}"
-  export CFLAGS="${CFLAGS} -march=x86-64-v4"
-  export CXXFLAGS="${CXXFLAGS} -march=x86-64-v4"
-
   cmake -S "open-wallpaper-engine-${pkgver}" -B build -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/usr \

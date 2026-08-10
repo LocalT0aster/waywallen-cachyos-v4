@@ -35,7 +35,7 @@ for package in waywallen waywallen-display open-wallpaper-engine; do
 done
 
 if [[ ${SIGN_PACKAGES:-1} == 1 ]]; then
-  repo-add --sign "$output/waywallen-cachyos-v4.db.tar.zst" "$output"/*.pkg.tar.zst
+  repo-add --sign "$output/waywallen.db.tar.zst" "$output"/*.pkg.tar.zst
 else
-  repo-add "$output/waywallen-cachyos-v4.db.tar.zst" "$output"/*.pkg.tar.zst
+  repo-add "$output/waywallen.db.tar.zst" "$output"/*.pkg.tar.zst
 fi

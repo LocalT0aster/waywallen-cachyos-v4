@@ -1,5 +1,5 @@
 pkgbase = waywallen-open-wallpaper-engine
-	pkgdesc = Wallpaper Engine renderer plugin for waywallen, optimized for CachyOS x86-64-v4
+	pkgdesc = Wallpaper Engine renderer plugin for waywallen
 	pkgver = 0.2.2
 	pkgrel = 1
 	url = https://github.com/waywallen/open-wallpaper-engine
