@@ -49,6 +49,7 @@ jobs:
           chown -R builder:builder /home/builder/.gnupg
           printf '%s' "$PACKAGER_GPG_PRIVATE_KEY" | su builder -c 'gpg --batch --import'
           su builder -c 'gpg --batch --with-colons --list-secret-keys 9EB061F8BA4ACE8D2AF6AC70CB133F037BD453CA | grep -q "^sec:"'
+      - run: ./ci/trust-package-signing-key.sh
       - run: |
           echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
           chmod 440 /etc/sudoers.d/builder
