@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-status=0
-waywallen --help >/dev/null 2>&1 || status=$?
-[[ $status -eq 0 || $status -eq 2 ]]
+waywallen_output=$(waywallen --help 2>&1 || true)
+[[ $waywallen_output == *'usage: waywallen '* ]]
 
-status=0
-waywallen-layer-shell --help >/dev/null 2>&1 || status=$?
-[[ $status -eq 0 || $status -eq 2 ]]
+layer_shell_output=$(waywallen-layer-shell --help 2>&1 || true)
+[[ $layer_shell_output == *'usage: waywallen-layer-shell '* ]]
