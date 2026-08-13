@@ -58,15 +58,8 @@ jobs:
       - run: ./ci/trust-package-signing-key.sh
       - run: |
           su builder -c 'cd "$GITHUB_WORKSPACE" && ./scripts/build-repository.sh'
-      - name: Commit validated release updates
-        run: |
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add .gitmodules upstream packages
-          git diff --cached --quiet || git commit -m 'chore: update upstream package releases'
-          git push
       - name: Save package build caches
-        if: always() && steps.package-cache.outputs.cache-hit != 'true'
+        if: steps.package-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v6
         with:
           path: |
@@ -74,3 +67,10 @@ jobs:
             /home/builder/.cargo/registry
             /home/builder/.cargo/git
           key: arch-build-${{ hashFiles('packages/**/PKGBUILD', '.gitmodules') }}
+      - name: Commit validated release updates
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add .gitmodules upstream packages
+          git diff --cached --quiet || git commit -m 'chore: update upstream package releases'
+          git push

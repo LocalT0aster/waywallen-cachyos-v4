@@ -55,13 +55,8 @@ jobs:
           chmod 440 /etc/sudoers.d/builder
           chown -R builder:builder "$GITHUB_WORKSPACE"
           su builder -c 'cd "$GITHUB_WORKSPACE" && ./scripts/build-repository.sh'
-      - uses: actions/upload-pages-artifact@v5
-        with:
-          path: dist
-      - id: deployment
-        uses: actions/deploy-pages@v5
       - name: Save package build caches
-        if: always() && steps.package-cache.outputs.cache-hit != 'true'
+        if: steps.package-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v6
         with:
           path: |
@@ -69,3 +64,8 @@ jobs:
             /home/builder/.cargo/registry
             /home/builder/.cargo/git
           key: arch-build-${{ hashFiles('packages/**/PKGBUILD', '.gitmodules') }}
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+      - id: deployment
+        uses: actions/deploy-pages@v5
