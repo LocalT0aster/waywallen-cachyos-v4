@@ -30,9 +30,10 @@ jobs:
             /var/cache/pacman/pkg
             /home/builder/.cargo/registry
             /home/builder/.cargo/git
-          key: arch-build-${{ hashFiles('packages/**/PKGBUILD', '.gitmodules') }}
+            /home/builder/.cache/ccache
+          key: arch-build-v2-${{ hashFiles('packages/**/PKGBUILD', '.gitmodules') }}
           restore-keys: |
-            arch-build-
+            arch-build-v2-
       - name: Authorize package build user
         run: |
           echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
@@ -53,7 +54,8 @@ jobs:
             /var/cache/pacman/pkg
             /home/builder/.cargo/registry
             /home/builder/.cargo/git
-          key: arch-build-${{ hashFiles('packages/**/PKGBUILD', '.gitmodules') }}
+            /home/builder/.cache/ccache
+          key: arch-build-v2-${{ hashFiles('packages/**/PKGBUILD', '.gitmodules') }}
       - name: Run executable tests
         run: ./scripts/test-packages.sh
       - name: Upload validated packages

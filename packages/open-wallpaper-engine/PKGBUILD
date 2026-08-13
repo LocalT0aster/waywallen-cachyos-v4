@@ -8,7 +8,7 @@ arch=('x86_64')
 url='https://github.com/waywallen/open-wallpaper-engine'
 license=('GPL-2.0-only')
 depends=('ffmpeg' 'glibc' 'libglvnd' 'mesa' 'vulkan-icd-loader' 'waywallen>=0.3.1')
-makedepends=('clang' 'cmake>=4.3.1' 'git' 'lld' 'ninja' 'pkgconf' 'vulkan-headers')
+makedepends=('ccache' 'clang' 'cmake>=4.3.1' 'git' 'lld' 'ninja' 'pkgconf' 'vulkan-headers')
 source=("open-wallpaper-engine-${pkgver}.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz")
 sha256sums=('62ec0c014b4ab6d3c136c46f1fbbc7b6891bcff3e9e0013435498b9f03bee297')
 
@@ -20,11 +20,15 @@ build() {
   export CFLAGS="${CFLAGS//-flto=auto/}"
   export CXXFLAGS="${CXXFLAGS//-flto=auto/}"
   export LDFLAGS="${LDFLAGS//-flto=auto/}"
+  export CCACHE_BASEDIR="${srcdir}"
+  export CCACHE_COMPILERCHECK=content
   cmake -S "open-wallpaper-engine-${pkgver}" -B build -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/usr \
     -DCMAKE_C_COMPILER=clang \
     -DCMAKE_CXX_COMPILER=clang++ \
+    -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+    -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
     -DCMAKE_LINKER_TYPE=LLD \
     -DBUILD_TESTS=OFF \
     -DBUILD_VIEWER=OFF \

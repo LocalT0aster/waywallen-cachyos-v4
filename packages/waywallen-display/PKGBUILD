@@ -8,7 +8,7 @@ arch=('x86_64')
 url='https://github.com/waywallen/waywallen-display'
 license=('MIT')
 depends=('glibc' 'libglvnd' 'vulkan-icd-loader' 'wayland')
-makedepends=('rust' 'cmake' 'gettext' 'glib2' 'gobject-introspection' 'gtk4' 'ninja' 'pkgconf' 'qt6-base' 'qt6-declarative' 'vulkan-headers')
+makedepends=('rust' 'ccache' 'cmake' 'gettext' 'glib2' 'gobject-introspection' 'gtk4' 'ninja' 'pkgconf' 'qt6-base' 'qt6-declarative' 'vulkan-headers')
 optdepends=('qt6-declarative: KDE Plasma integration' 'gtk4: GNOME Shell integration')
 conflicts=('plasma-wallpaper-waywallen')
 replaces=('plasma-wallpaper-waywallen')
@@ -22,9 +22,13 @@ build() {
   export CFLAGS="${CFLAGS//-flto=auto/}"
   export CXXFLAGS="${CXXFLAGS//-flto=auto/}"
   export LDFLAGS="${LDFLAGS//-flto=auto/}"
+  export CCACHE_BASEDIR="${srcdir}"
+  export CCACHE_COMPILERCHECK=content
   cmake -S "${pkgname}-${pkgver}" -B build -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+    -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
     -DWAYWALLEN_DISPLAY_PLUGIN_QML=ON \
     -DWAYWALLEN_DISPLAY_PLUGIN_GOBJECT=ON
   cmake --build build

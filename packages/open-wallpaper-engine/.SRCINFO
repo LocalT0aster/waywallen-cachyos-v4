@@ -5,6 +5,7 @@ pkgbase = waywallen-open-wallpaper-engine
 	url = https://github.com/waywallen/open-wallpaper-engine
 	arch = x86_64
 	license = GPL-2.0-only
+	makedepends = ccache
 	makedepends = clang
 	makedepends = cmake>=4.3.1
 	makedepends = git

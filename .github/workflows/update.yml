@@ -31,9 +31,10 @@ jobs:
             /var/cache/pacman/pkg
             /home/builder/.cargo/registry
             /home/builder/.cargo/git
-          key: arch-build-${{ hashFiles('packages/**/PKGBUILD', '.gitmodules') }}
+            /home/builder/.cache/ccache
+          key: arch-build-v2-${{ hashFiles('packages/**/PKGBUILD', '.gitmodules') }}
           restore-keys: |
-            arch-build-
+            arch-build-v2-
       - name: Authorize the update checkout
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -66,7 +67,8 @@ jobs:
             /var/cache/pacman/pkg
             /home/builder/.cargo/registry
             /home/builder/.cargo/git
-          key: arch-build-${{ hashFiles('packages/**/PKGBUILD', '.gitmodules') }}
+            /home/builder/.cache/ccache
+          key: arch-build-v2-${{ hashFiles('packages/**/PKGBUILD', '.gitmodules') }}
       - name: Commit validated release updates
         run: |
           git config user.name github-actions[bot]
