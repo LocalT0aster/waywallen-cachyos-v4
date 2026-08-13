@@ -20,7 +20,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: main
       - run: pacman -Sy --noconfirm
@@ -32,7 +32,7 @@ jobs:
           install -d -o builder -g builder /home/builder/.cargo
       - name: Restore package build caches
         id: package-cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: |
             /var/cache/pacman/pkg
@@ -55,14 +55,14 @@ jobs:
           chmod 440 /etc/sudoers.d/builder
           chown -R builder:builder "$GITHUB_WORKSPACE"
           su builder -c 'cd "$GITHUB_WORKSPACE" && ./scripts/build-repository.sh'
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
       - name: Save package build caches
         if: always() && steps.package-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: |
             /var/cache/pacman/pkg

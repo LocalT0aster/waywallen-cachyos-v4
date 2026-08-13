@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-24.04
     container: archlinux:base-devel
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: pacman -Sy --noconfirm
       - run: pacman -S --noconfirm --needed git github-cli
       - run: ./ci/checkout-repository.sh
@@ -24,7 +24,7 @@ jobs:
           install -d -o builder -g builder /home/builder/.cargo
       - name: Restore package build caches
         id: package-cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: |
             /var/cache/pacman/pkg
@@ -47,7 +47,7 @@ jobs:
         run: su builder -c 'cd "$GITHUB_WORKSPACE" && SIGN_PACKAGES=0 ./scripts/build-repository.sh'
       - name: Save package build caches
         if: steps.package-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: |
             /var/cache/pacman/pkg
