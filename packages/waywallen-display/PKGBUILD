@@ -10,6 +10,8 @@ license=('MIT')
 depends=('glibc' 'libglvnd' 'vulkan-icd-loader' 'wayland')
 makedepends=('rust' 'cmake' 'gettext' 'glib2' 'gobject-introspection' 'gtk4' 'ninja' 'pkgconf' 'qt6-base' 'qt6-declarative' 'vulkan-headers')
 optdepends=('qt6-declarative: KDE Plasma integration' 'gtk4: GNOME Shell integration')
+conflicts=('plasma-wallpaper-waywallen')
+replaces=('plasma-wallpaper-waywallen')
 source=("${pkgname}-${pkgver}.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz")
 sha256sums=('08439e8990da002f2a6d781edfe6b16aabd2025e6e8fb39f32200f33a788efc9')
 
@@ -32,5 +34,11 @@ build() {
 package() {
   DESTDIR="${pkgdir}" cmake --install build
   install -Dm755 "${pkgname}-${pkgver}/target/release/waywallen-layer-shell" "${pkgdir}/usr/bin/waywallen-layer-shell"
+  install -d "${pkgdir}/usr/share/plasma/wallpapers"
+  cp -a "${pkgname}-${pkgver}/extensions/kde/package" "${pkgdir}/usr/share/plasma/wallpapers/org.waywallen.kde"
+  install -Dm644 "${pkgname}-${pkgver}/extensions/kde/package/contents/ui/Wrapper/PluginDisplay.qml" \
+    "${pkgdir}/usr/share/plasma/wallpapers/org.waywallen.kde/contents/ui/Plugin/PluginDisplay.qml"
+  install -Dm644 "${pkgname}-${pkgver}/extensions/kde/package/contents/ui/Wrapper/PluginInfo.qml" \
+    "${pkgdir}/usr/share/plasma/wallpapers/org.waywallen.kde/contents/ui/Plugin/PluginInfo.qml"
   install -Dm644 "${pkgname}-${pkgver}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
