@@ -1,16 +1,16 @@
 # Maintainer: LocalT0aster <90502400+LocalT0aster@users.noreply.github.com>
 
 pkgname=waywallen-open-wallpaper-engine
-pkgver=0.2.3
+pkgver=0.2.2
 pkgrel=1
 pkgdesc='Wallpaper Engine renderer plugin for waywallen'
 arch=('x86_64')
 url='https://github.com/waywallen/open-wallpaper-engine'
 license=('GPL-2.0-only')
-depends=('ffmpeg' 'glibc' 'libglvnd' 'mesa' 'vulkan-icd-loader' 'waywallen>=0.3.3')
+depends=('ffmpeg' 'glibc' 'libglvnd' 'mesa' 'vulkan-icd-loader' 'waywallen>=0.3.1')
 makedepends=('clang' 'cmake>=4.3.1' 'git' 'lld' 'ninja' 'pkgconf' 'vulkan-headers')
 source=("open-wallpaper-engine-${pkgver}.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz")
-sha256sums=('67567e2ff7ff525904fe99522a725f19b34e9fe1cef4f792120035fffcac250a')
+sha256sums=('62ec0c014b4ab6d3c136c46f1fbbc7b6891bcff3e9e0013435498b9f03bee297')
 
 build() {
   # CEF's wrapper target and C++ modules must share a compatible hardening profile.

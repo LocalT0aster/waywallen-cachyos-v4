@@ -1,7 +1,7 @@
 # Maintainer: LocalT0aster <90502400+LocalT0aster@users.noreply.github.com>
 
 pkgname=waywallen
-pkgver=0.3.3
+pkgver=0.3.1
 pkgrel=1
 pkgdesc='Wallpaper manager for Linux'
 arch=('x86_64')
@@ -11,7 +11,7 @@ depends=('ffmpeg' 'glibc' 'libglvnd' 'libxkbcommon' 'mesa' 'qt6-base' 'qt6-decla
 makedepends=('rust' 'clang' 'cmake>=4.3.1' 'git' 'git-lfs' 'lld' 'ninja' 'pkgconf' 'qt6-shadertools' 'vulkan-headers')
 optdepends=('waywallen-display: desktop integration clients')
 source=("${pkgname}-${pkgver}.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz")
-sha256sums=('73ca4928f60737d4c02801eb10d35cfab558963dfe0697f628e6484ba2d93b7d')
+sha256sums=('078454a1c7834ab009e51cd382ee0084e1830ad41d1711e985656c4427e83a6c')
 
 build() {
   # GCC LTO objects and Clang/C++ modules cannot be linked together reliably.
@@ -27,9 +27,6 @@ build() {
     -DCMAKE_C_COMPILER=clang \
     -DCMAKE_CXX_COMPILER=clang++ \
     -DCMAKE_LINKER_TYPE=LLD
-  # FFmpeg 8 widened AVVkFrame::access from uint32_t to uint64_t.
-  sed -i '/static_assert(sizeof(static_cast<AVVkFrame.*access\[0\])/d' \
-    build/_deps/wavsen-src/src/video/video_decoder.cpp
   cmake --build build
 }
 
