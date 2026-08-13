@@ -45,10 +45,8 @@ jobs:
           done'
       - name: Build signed repository packages
         run: su builder -c 'cd "$GITHUB_WORKSPACE" && SIGN_PACKAGES=0 ./scripts/build-repository.sh'
-      - name: Run executable tests
-        run: ./scripts/test-packages.sh
       - name: Save package build caches
-        if: always() && steps.package-cache.outputs.cache-hit != 'true'
+        if: steps.package-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: |
@@ -56,3 +54,5 @@ jobs:
             /home/builder/.cargo/registry
             /home/builder/.cargo/git
           key: arch-build-${{ hashFiles('packages/**/PKGBUILD', '.gitmodules') }}
+      - name: Run executable tests
+        run: ./scripts/test-packages.sh
