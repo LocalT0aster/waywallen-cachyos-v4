@@ -15,6 +15,7 @@ jobs:
     container: archlinux:base-devel
     steps:
       - uses: actions/checkout@v4
+      - run: pacman -Sy --noconfirm
       - run: pacman -S --noconfirm --needed git github-cli
       - run: ./ci/checkout-repository.sh
       - name: Create package build user
@@ -54,4 +55,4 @@ jobs:
             /var/cache/pacman/pkg
             /home/builder/.cargo/registry
             /home/builder/.cargo/git
-          key: ${{ steps.package-cache.outputs.cache-primary-key }}
+          key: arch-build-${{ hashFiles('packages/**/PKGBUILD', '.gitmodules') }}
