@@ -2,18 +2,18 @@ name: Publish pacman repository
 
 on:
   workflow_run:
-    workflows: [Update upstream releases]
+    workflows: [Validate packages]
     types: [completed]
-  workflow_dispatch:
 
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 
 jobs:
   publish:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
     runs-on: ubuntu-24.04
     container: archlinux:base-devel
     environment:
@@ -22,48 +22,29 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: main
+          ref: ${{ github.event.workflow_run.head_sha }}
       - run: pacman -Sy --noconfirm
-      - run: pacman -S --noconfirm --needed git sudo
-      - run: ./ci/checkout-repository.sh
-      - name: Create package build user
-        run: |
-          useradd --create-home builder
-          install -d -o builder -g builder /home/builder/.cargo
-      - name: Restore package build caches
-        id: package-cache
-        uses: actions/cache/restore@v6
+      - run: pacman -S --noconfirm --needed git
+      - name: Download validated packages
+        uses: actions/download-artifact@v8
         with:
-          path: |
-            /var/cache/pacman/pkg
-            /home/builder/.cargo/registry
-            /home/builder/.cargo/git
-          key: arch-build-${{ hashFiles('packages/**/PKGBUILD', '.gitmodules') }}
-          restore-keys: |
-            arch-build-
+          name: validated-packages
+          path: dist/x86_64
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
       - name: Import package signing key
         env:
           PACKAGER_GPG_PRIVATE_KEY: ${{ secrets.PACKAGER_GPG_PRIVATE_KEY }}
         run: |
-          install -d -m 700 /home/builder/.gnupg
-          chown -R builder:builder /home/builder/.gnupg
-          printf '%s' "$PACKAGER_GPG_PRIVATE_KEY" | su builder -c 'gpg --batch --import'
-          su builder -c 'gpg --batch --with-colons --list-secret-keys B075783531075AA59D4911C7448DCEC4307C77A0 | grep -q "^sec:"'
-      - run: ./ci/trust-package-signing-key.sh
-      - run: |
-          echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
-          chmod 440 /etc/sudoers.d/builder
-          chown -R builder:builder "$GITHUB_WORKSPACE"
-          su builder -c 'cd "$GITHUB_WORKSPACE" && ./scripts/build-repository.sh'
-      - name: Save package build caches
-        if: steps.package-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v6
-        with:
-          path: |
-            /var/cache/pacman/pkg
-            /home/builder/.cargo/registry
-            /home/builder/.cargo/git
-          key: arch-build-${{ hashFiles('packages/**/PKGBUILD', '.gitmodules') }}
+          printf '%s' "$PACKAGER_GPG_PRIVATE_KEY" | gpg --batch --import
+          gpg --batch --with-colons --list-secret-keys B075783531075AA59D4911C7448DCEC4307C77A0 | grep -q "^sec:"
+      - name: Sign repository packages
+        run: |
+          for package in dist/x86_64/*.pkg.tar.zst; do
+            gpg --batch --yes --detach-sign "$package"
+          done
+          repo-add dist/x86_64/waywallen.db.tar.zst dist/x86_64/*.pkg.tar.zst
+          gpg --batch --yes --detach-sign dist/x86_64/waywallen.db.tar.zst
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist

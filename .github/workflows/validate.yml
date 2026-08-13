@@ -43,7 +43,7 @@ jobs:
           su builder -c 'for package in packages/*; do
             (cd "$package" && makepkg --verifysource && test -s .SRCINFO)
           done'
-      - name: Build signed repository packages
+      - name: Build repository packages
         run: su builder -c 'cd "$GITHUB_WORKSPACE" && SIGN_PACKAGES=0 ./scripts/build-repository.sh'
       - name: Save package build caches
         if: steps.package-cache.outputs.cache-hit != 'true'
@@ -56,3 +56,11 @@ jobs:
           key: arch-build-${{ hashFiles('packages/**/PKGBUILD', '.gitmodules') }}
       - name: Run executable tests
         run: ./scripts/test-packages.sh
+      - name: Upload validated packages
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v7
+        with:
+          name: validated-packages
+          path: dist/x86_64/*.pkg.tar.zst
+          if-no-files-found: error
+          retention-days: 1
