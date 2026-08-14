@@ -31,6 +31,9 @@ build() {
     -DCMAKE_C_COMPILER_LAUNCHER=ccache \
     -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
     -DCMAKE_LINKER_TYPE=LLD
+  # FFmpeg 8 widened AVVkFrame::access from uint32_t to uint64_t.
+  sed -i '/static_assert(sizeof(static_cast<AVVkFrame.*access\[0\])/d' \
+    build/_deps/wavsen-src/src/video/video_decoder.cpp
   cmake --build build
 }
 
