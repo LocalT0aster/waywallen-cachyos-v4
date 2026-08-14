@@ -45,6 +45,8 @@ jobs:
           done
           repo-add dist/x86_64/waywallen.db.tar.zst dist/x86_64/*.pkg.tar.zst
           gpg --batch --yes --detach-sign dist/x86_64/waywallen.db.tar.zst
+          cp dist/x86_64/waywallen.db.tar.zst.sig dist/x86_64/waywallen.db.sig
+          install -Dm644 site/index.html dist/index.html
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
