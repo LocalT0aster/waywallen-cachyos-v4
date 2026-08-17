@@ -40,8 +40,7 @@ jobs:
           done
           repo-add dist/x86_64/waywallen.db.tar.zst dist/x86_64/*.pkg.tar.zst
           gpg --batch --yes --detach-sign dist/x86_64/waywallen.db.tar.zst
-          cp dist/x86_64/waywallen.db.tar.zst dist/x86_64/waywallen.db
-          cp dist/x86_64/waywallen.db.tar.zst.sig dist/x86_64/waywallen.db.sig
+          ln -sf waywallen.db.tar.zst.sig dist/x86_64/waywallen.db.sig
       - name: Publish release-backed repository
         env:
           GH_TOKEN: ${{ github.token }}
