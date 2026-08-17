@@ -6,25 +6,20 @@ on:
     types: [completed]
 
 permissions:
-  contents: read
-  actions: read
-  pages: write
-  id-token: write
+  actions: write
+  contents: write
 
 jobs:
   publish:
     if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
     runs-on: ubuntu-24.04
     container: archlinux:base-devel
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
       - run: pacman -Sy --noconfirm
-      - run: pacman -S --noconfirm --needed git
+      - run: pacman -S --noconfirm --needed git github-cli
       - name: Download validated packages
         uses: actions/download-artifact@v8
         with:
@@ -45,10 +40,19 @@ jobs:
           done
           repo-add dist/x86_64/waywallen.db.tar.zst dist/x86_64/*.pkg.tar.zst
           gpg --batch --yes --detach-sign dist/x86_64/waywallen.db.tar.zst
+          cp dist/x86_64/waywallen.db.tar.zst dist/x86_64/waywallen.db
           cp dist/x86_64/waywallen.db.tar.zst.sig dist/x86_64/waywallen.db.sig
-          install -Dm644 site/index.html dist/index.html
-      - uses: actions/upload-pages-artifact@v5
-        with:
-          path: dist
-      - id: deployment
-        uses: actions/deploy-pages@v5
+      - name: Publish release-backed repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view pacman-repository --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || \
+            gh release create pacman-repository --repo "$GITHUB_REPOSITORY" --title 'Waywallen pacman repository' --notes 'Rolling signed pacman repository.' --latest=false
+          gh release upload pacman-repository dist/x86_64/*.pkg.tar.zst dist/x86_64/*.pkg.tar.zst.sig --clobber --repo "$GITHUB_REPOSITORY"
+          gh release upload pacman-repository dist/x86_64/waywallen.db dist/x86_64/waywallen.db.sig dist/x86_64/waywallen.db.tar.zst dist/x86_64/waywallen.db.tar.zst.sig --clobber --repo "$GITHUB_REPOSITORY"
+      - name: Delete consumed validation artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          artifact_id=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/${{ github.event.workflow_run.id }}/artifacts" --jq '.artifacts[] | select(.name == "validated-packages") | .id')
+          gh api --method DELETE "repos/$GITHUB_REPOSITORY/actions/artifacts/$artifact_id"

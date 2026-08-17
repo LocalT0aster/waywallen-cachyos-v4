@@ -4,7 +4,6 @@ set -euo pipefail
 root=$(git rev-parse --show-toplevel)
 output=${1:-"$root/dist/x86_64"}
 mkdir -p "$output"
-install -Dm644 "$root/site/index.html" "$(dirname "$output")/index.html"
 
 for package in waywallen waywallen-display open-wallpaper-engine; do
   (

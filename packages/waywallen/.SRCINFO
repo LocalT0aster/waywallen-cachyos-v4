@@ -1,6 +1,6 @@
 pkgbase = waywallen
 	pkgdesc = Wallpaper manager for Linux
-	pkgver = 0.3.1
+	pkgver = 0.3.5
 	pkgrel = 1
 	url = https://github.com/waywallen/waywallen
 	arch = x86_64
@@ -29,7 +29,7 @@ pkgbase = waywallen
 	depends = vulkan-icd-loader
 	depends = zstd
 	optdepends = waywallen-display: desktop integration clients
-	source = waywallen-0.3.1.tar.gz::https://github.com/waywallen/waywallen/archive/refs/tags/v0.3.1.tar.gz
-	sha256sums = 078454a1c7834ab009e51cd382ee0084e1830ad41d1711e985656c4427e83a6c
+	source = waywallen-0.3.5.tar.gz::https://github.com/waywallen/waywallen/archive/refs/tags/v0.3.5.tar.gz
+	sha256sums = ac253eb1266853979854abf9537c80537b6bdabf96bdefa43f308b6d06fc6f94
 
 pkgname = waywallen

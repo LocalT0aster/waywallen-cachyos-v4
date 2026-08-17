@@ -2,7 +2,7 @@
 
 Source-built generic `x86_64` Arch packages for the Waywallen stack. The
 monorepo pins upstream releases as Git submodules and publishes signed packages
-to GitHub Pages.
+to GitHub Releases.
 
 ## Packages
 
@@ -15,8 +15,7 @@ exports the `waywallen-bridge` CMake package it consumes.
 
 ## Install
 
-Import the repository key and configure pacman after GitHub Pages has been
-enabled for this repository:
+Import the repository key and configure pacman:
 
 ```sh
 sudo pacman-key --add keys/waywallen-packages.asc
@@ -27,7 +26,7 @@ Add this repository to `/etc/pacman.conf`:
 
 ```ini
 [waywallen]
-Server = https://localt0aster.github.io/waywallen-pkgbuilds/x86_64
+Server = https://github.com/LocalT0aster/waywallen-pkgbuilds/releases/download/pacman-repository
 ```
 
 ## Local maintenance
@@ -52,7 +51,7 @@ Export the private key locally, then add its armored content as the
 gpg --armor --export-secret-keys B075783531075AA59D4911C7448DCEC4307C77A0
 ```
 
-Enable GitHub Pages with GitHub Actions as the source before dispatching the
-`Publish pacman repository` workflow. The private key is never committed.
+The private key is never committed. The publish workflow uploads signed package
+archives and repository metadata to the `pacman-repository` release.
 
 CI builds and runs smoke tests on standard GitHub-hosted x86_64 runners.

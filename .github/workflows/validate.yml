@@ -15,49 +15,9 @@ jobs:
     container: archlinux:base-devel
     steps:
       - uses: actions/checkout@v7
-      - run: pacman -Sy --noconfirm
-      - run: pacman -S --noconfirm --needed git github-cli
-      - run: ./ci/checkout-repository.sh
-      - name: Create package build user
-        run: |
-          useradd --create-home builder
-          install -d -o builder -g builder /home/builder/.cargo
-      - name: Restore package build caches
-        id: package-cache
-        uses: actions/cache/restore@v6
         with:
-          path: |
-            /var/cache/pacman/pkg
-            /home/builder/.cargo/registry
-            /home/builder/.cargo/git
-            /home/builder/.cache/ccache
-          key: arch-build-v2-${{ hashFiles('packages/**/PKGBUILD', '.gitmodules') }}
-          restore-keys: |
-            arch-build-v2-
-      - name: Authorize package build user
-        run: |
-          echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
-          chmod 440 /etc/sudoers.d/builder
-          chown -R builder:builder "$GITHUB_WORKSPACE"
-      - name: Verify package sources and metadata
-        run: |
-          su builder -c 'for package in packages/*; do
-            (cd "$package" && makepkg --verifysource && test -s .SRCINFO)
-          done'
-      - name: Build repository packages
-        run: su builder -c 'cd "$GITHUB_WORKSPACE" && SIGN_PACKAGES=0 ./scripts/build-repository.sh'
-      - name: Save package build caches
-        if: steps.package-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v6
-        with:
-          path: |
-            /var/cache/pacman/pkg
-            /home/builder/.cargo/registry
-            /home/builder/.cargo/git
-            /home/builder/.cache/ccache
-          key: arch-build-v2-${{ hashFiles('packages/**/PKGBUILD', '.gitmodules') }}
-      - name: Run executable tests
-        run: ./scripts/test-packages.sh
+          submodules: recursive
+      - uses: ./.github/actions/build-test
       - name: Upload validated packages
         if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v7

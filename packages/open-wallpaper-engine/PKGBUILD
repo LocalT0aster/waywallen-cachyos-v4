@@ -1,44 +1,32 @@
 # Maintainer: LocalT0aster <90502400+LocalT0aster@users.noreply.github.com>
 
 pkgname=waywallen-open-wallpaper-engine
-pkgver=0.2.2
+pkgver=0.2.5
 pkgrel=1
 pkgdesc='Wallpaper Engine renderer plugin for waywallen'
 arch=('x86_64')
 url='https://github.com/waywallen/open-wallpaper-engine'
 license=('GPL-2.0-only')
-depends=('ffmpeg' 'glibc' 'libglvnd' 'mesa' 'vulkan-icd-loader' 'waywallen>=0.3.1')
-makedepends=('ccache' 'clang' 'cmake>=4.3.1' 'git' 'lld' 'ninja' 'pkgconf' 'vulkan-headers')
-source=("open-wallpaper-engine-${pkgver}.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz")
-sha256sums=('62ec0c014b4ab6d3c136c46f1fbbc7b6891bcff3e9e0013435498b9f03bee297')
+depends=('alsa-lib' 'ffmpeg' 'fontconfig' 'freetype2' 'glibc' 'gtk3' 'libglvnd' 'libx11' 'libxcomposite' 'libxdamage' 'libxext' 'libxfixes' 'libxkbcommon' 'libxrandr' 'libxrender' 'libxss' 'libxcb' 'lz4' 'mesa' 'nss' 'vulkan-icd-loader' 'wayland' 'waywallen>=0.3.3')
+makedepends=('ccache' 'clang>=22' 'cmake>=4.0' 'eigen' 'git' 'glslang' 'lld' 'nasm' 'ninja' 'patchelf' 'pkgconf' 'vulkan-headers')
+source=("open-wallpaper-engine-${pkgver}.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz"
+        'lito-linux-x86_64.tar.gz::https://github.com/litocpp/lito/releases/download/v0.2.1/lito-linux-x86_64.tar.gz')
+sha256sums=('5556175ef66072caaa9db8f3d1470d175af33e41d0a8b84627a43ba421f6fc03'
+            '6ada50b35fec8b4b5dea7e2c2822019ed9cacf8037ccda12d8ab6443ec4a20c3')
 
 build() {
-  # CEF's wrapper target and C++ modules must share a compatible hardening profile.
-  export CFLAGS="${CFLAGS/-Wp,-D_FORTIFY_SOURCE=3/}"
-  export CXXFLAGS="${CXXFLAGS/-Wp,-D_FORTIFY_SOURCE=3/}"
-  export CPPFLAGS="${CPPFLAGS/-D_FORTIFY_SOURCE=3/}"
-  export CFLAGS="${CFLAGS//-flto=auto/}"
-  export CXXFLAGS="${CXXFLAGS//-flto=auto/}"
-  export LDFLAGS="${LDFLAGS//-flto=auto/}"
+  export CC=clang
+  export CXX=clang++
   export CCACHE_BASEDIR="${srcdir}"
   export CCACHE_COMPILERCHECK=content
-  cmake -S "open-wallpaper-engine-${pkgver}" -B build -G Ninja \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_INSTALL_PREFIX=/usr \
-    -DCMAKE_C_COMPILER=clang \
-    -DCMAKE_CXX_COMPILER=clang++ \
-    -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-    -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-    -DCMAKE_LINKER_TYPE=LLD \
-    -DBUILD_TESTS=OFF \
-    -DBUILD_VIEWER=OFF \
-    -DBUILD_WAYWALLEN=ON \
-    -DBUILD_WESCENE=ON \
-    -DBUILD_WEWEB=ON
-  cmake --build build
+  cd "open-wallpaper-engine-${pkgver}"
+  "${srcdir}/lito-linux-x86_64/bin/lito" install -p owe-waywallen-plugin \
+    --prefix "${srcdir}/owe-stage/usr" \
+    --config 'cmake.search-path=["/usr"]'
 }
 
 package() {
-  DESTDIR="${pkgdir}" cmake --install build
+  cp -a "${srcdir}/owe-stage/." "${pkgdir}/"
+  patchelf --set-rpath '$ORIGIN' "${pkgdir}/usr/bin/weweb/waywallen-weweb-renderer"
   install -Dm644 "open-wallpaper-engine-${pkgver}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }

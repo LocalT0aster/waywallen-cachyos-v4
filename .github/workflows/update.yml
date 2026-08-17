@@ -8,6 +8,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: upstream-update
+  cancel-in-progress: false
+
 jobs:
   update:
     runs-on: ubuntu-24.04
@@ -16,59 +20,21 @@ jobs:
       - uses: actions/checkout@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-      - run: pacman -Sy --noconfirm
-      - run: pacman -S --noconfirm --needed git github-cli pacman-contrib sudo
-      - run: ./ci/checkout-repository.sh
-      - name: Create package build user
-        run: |
-          useradd --create-home builder
-          install -d -o builder -g builder /home/builder/.cargo
-      - name: Restore package build caches
-        id: package-cache
-        uses: actions/cache/restore@v6
-        with:
-          path: |
-            /var/cache/pacman/pkg
-            /home/builder/.cargo/registry
-            /home/builder/.cargo/git
-            /home/builder/.cache/ccache
-          key: arch-build-v2-${{ hashFiles('packages/**/PKGBUILD', '.gitmodules') }}
-          restore-keys: |
-            arch-build-v2-
+          submodules: recursive
+          fetch-depth: 0
+      - run: pacman -Sy --noconfirm && pacman -S --noconfirm --needed git github-cli pacman-contrib sudo
       - name: Authorize the update checkout
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
       - run: |
-          echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
-          chmod 440 /etc/sudoers.d/builder
-          chown -R builder:builder "$GITHUB_WORKSPACE"
+          ./ci/setup-build-user.sh
       - name: Update pinned submodules
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./scripts/update-upstreams.sh
       - run: su builder -c 'cd "$GITHUB_WORKSPACE" && ./scripts/update-pkgbuilds.sh'
-      - name: Import package signing key
-        env:
-          PACKAGER_GPG_PRIVATE_KEY: ${{ secrets.PACKAGER_GPG_PRIVATE_KEY }}
-        run: |
-          install -d -m 700 /home/builder/.gnupg
-          chown builder:builder /home/builder/.gnupg
-          printf '%s' "$PACKAGER_GPG_PRIVATE_KEY" | su builder -c 'gpg --batch --import'
-          su builder -c 'gpg --batch --with-colons --list-secret-keys B075783531075AA59D4911C7448DCEC4307C77A0 | grep -q "^sec:"'
-      - run: ./ci/trust-package-signing-key.sh
-      - run: |
-          su builder -c 'cd "$GITHUB_WORKSPACE" && ./scripts/build-repository.sh'
-      - name: Save package build caches
-        if: steps.package-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v6
-        with:
-          path: |
-            /var/cache/pacman/pkg
-            /home/builder/.cargo/registry
-            /home/builder/.cargo/git
-            /home/builder/.cache/ccache
-          key: arch-build-v2-${{ hashFiles('packages/**/PKGBUILD', '.gitmodules') }}
+      - uses: ./.github/actions/build-test
       - name: Commit validated release updates
         run: |
           git config user.name github-actions[bot]
