@@ -15,8 +15,6 @@ jobs:
     container: archlinux:base-devel
     steps:
       - uses: actions/checkout@v7
-        with:
-          submodules: recursive
       - uses: ./.github/actions/build-test
       - name: Upload validated packages
         if: github.ref == 'refs/heads/main'

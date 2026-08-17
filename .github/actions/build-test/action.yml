@@ -1,12 +1,21 @@
 name: Build and test packages
 description: Build and smoke-test the package suite in the caller workspace.
 
+inputs:
+  checkout:
+    description: Recreate the repository after Checkout's Git-less fallback.
+    default: 'true'
+
 runs:
   using: composite
   steps:
     - name: Install build tools
       shell: bash
       run: pacman -Sy --noconfirm && pacman -S --noconfirm --needed git sudo
+    - name: Recreate Git checkout
+      if: inputs.checkout == 'true'
+      shell: bash
+      run: ./ci/checkout-repository.sh
     - name: Prepare package build user
       shell: bash
       run: ./ci/setup-build-user.sh
