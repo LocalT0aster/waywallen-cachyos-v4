@@ -12,6 +12,7 @@ pkgbase = waywallen-open-wallpaper-engine
 	makedepends = git
 	makedepends = glslang
 	makedepends = lld
+	makedepends = llvm
 	makedepends = nasm
 	makedepends = ninja
 	makedepends = patchelf
