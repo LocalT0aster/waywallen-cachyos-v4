@@ -56,8 +56,8 @@ runs:
       shell: bash
       run: |
         packages='${{ steps.packages.outputs.value }}'
-        su builder -c 'for package in '"$packages"'; do
-          (cd "$package" && makepkg --verifysource && test -s .SRCINFO)
+        su builder -c 'cd "$GITHUB_WORKSPACE" && for package in '"$packages"'; do
+          (cd "packages/$package" && makepkg --verifysource && test -s .SRCINFO)
         done'
     - name: Build repository packages
       if: steps.packages.outputs.value != ''
