@@ -2,8 +2,20 @@ name: Validate packages
 
 on:
   pull_request:
+    paths:
+      - '.github/actions/build-test/**'
+      - '.github/workflows/**'
+      - 'packages/**'
+      - 'scripts/**'
+      - 'upstream/**'
   push:
     branches: [main]
+    paths:
+      - '.github/actions/build-test/**'
+      - '.github/workflows/**'
+      - 'packages/**'
+      - 'scripts/**'
+      - 'upstream/**'
   workflow_dispatch:
 
 permissions:
@@ -15,9 +27,12 @@ jobs:
     container: archlinux:base-devel
     steps:
       - uses: actions/checkout@v7
-      - uses: ./.github/actions/build-test
+      - id: build
+        uses: ./.github/actions/build-test
+        with:
+          diff-base: ${{ github.event.before || github.event.pull_request.base.sha }}
       - name: Upload validated packages
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && steps.build.outputs.packages != ''
         uses: actions/upload-artifact@v7
         with:
           name: validated-packages

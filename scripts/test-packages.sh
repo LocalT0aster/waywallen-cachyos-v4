@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+[[ " ${BUILD_PACKAGES:-waywallen waywallen-display open-wallpaper-engine} " == *' waywallen '* ]] || exit 0
+
 waywallen_output=$(waywallen --help 2>&1 || true)
 [[ $waywallen_output == *'Usage: waywallen '* ]]
 

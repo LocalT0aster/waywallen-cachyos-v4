@@ -5,7 +5,9 @@ root=$(git rev-parse --show-toplevel)
 output=${1:-"$root/dist/x86_64"}
 mkdir -p "$output"
 
+read -r -a selected_packages <<< "${BUILD_PACKAGES:-waywallen waywallen-display open-wallpaper-engine}"
 for package in waywallen waywallen-display open-wallpaper-engine; do
+  [[ " ${selected_packages[*]} " == *" $package "* ]] || continue
   (
     cd "$root/packages/$package"
     makepkg_args=(--syncdeps --noconfirm --cleanbuild)
@@ -34,6 +36,7 @@ for package in waywallen waywallen-display open-wallpaper-engine; do
   )
 done
 
+(( ${#selected_packages[@]} )) || exit 0
 if [[ ${SIGN_PACKAGES:-1} == 1 ]]; then
   repo-add --sign "$output/waywallen.db.tar.zst" "$output"/*.pkg.tar.zst
 else

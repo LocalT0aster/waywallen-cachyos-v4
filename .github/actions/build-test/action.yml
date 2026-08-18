@@ -5,6 +5,14 @@ inputs:
   checkout:
     description: Recreate the repository after Checkout's Git-less fallback.
     default: 'true'
+  diff-base:
+    description: Commit to compare against when selecting packages.
+    default: ''
+
+outputs:
+  packages:
+    description: Space-separated package directories selected for validation.
+    value: ${{ steps.packages.outputs.value }}
 
 runs:
   using: composite
@@ -19,6 +27,12 @@ runs:
     - name: Prepare package build user
       shell: bash
       run: ./ci/setup-build-user.sh
+    - name: Select affected packages
+      id: packages
+      shell: bash
+      run: |
+        packages=$(./scripts/changed-packages.sh '${{ inputs.diff-base }}')
+        printf 'value=%s\n' "$packages" >> "$GITHUB_OUTPUT"
     - name: Calculate package cache key
       id: cache-key
       shell: bash
@@ -38,14 +52,17 @@ runs:
         restore-keys: |
           arch-build-v3-
     - name: Verify package sources and metadata
+      if: steps.packages.outputs.value != ''
       shell: bash
       run: |
-        su builder -c 'for package in packages/*; do
+        packages='${{ steps.packages.outputs.value }}'
+        su builder -c 'for package in '"$packages"'; do
           (cd "$package" && makepkg --verifysource && test -s .SRCINFO)
         done'
     - name: Build repository packages
+      if: steps.packages.outputs.value != ''
       shell: bash
-      run: su builder -c 'cd "$GITHUB_WORKSPACE" && SIGN_PACKAGES=0 ./scripts/build-repository.sh'
+      run: su builder -c 'cd "$GITHUB_WORKSPACE" && BUILD_PACKAGES="${{ steps.packages.outputs.value }}" SIGN_PACKAGES=0 ./scripts/build-repository.sh'
     - name: Save package build caches
       if: steps.package-cache.outputs.cache-hit != 'true'
       uses: actions/cache/save@v6
@@ -57,5 +74,6 @@ runs:
           /home/builder/.cache/ccache
         key: arch-build-v3-${{ steps.cache-key.outputs.value }}
     - name: Run executable tests
+      if: steps.packages.outputs.value != ''
       shell: bash
-      run: ./scripts/test-packages.sh
+      run: BUILD_PACKAGES='${{ steps.packages.outputs.value }}' ./scripts/test-packages.sh

@@ -45,6 +45,7 @@ jobs:
         if: steps.updates.outputs.changed == 'true'
         with:
           checkout: 'false'
+          diff-base: --working-tree
       - name: Commit validated release updates
         if: steps.updates.outputs.changed == 'true'
         run: |

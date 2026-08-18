@@ -20,13 +20,33 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha }}
       - run: pacman -Sy --noconfirm
       - run: pacman -S --noconfirm --needed git github-cli
+      - name: Download current repository packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p dist/x86_64
+          if gh release view pacman-repository --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release download pacman-repository --pattern '*.pkg.tar.zst' --dir dist/x86_64 --repo "$GITHUB_REPOSITORY"
+          fi
       - name: Download validated packages
         uses: actions/download-artifact@v8
         with:
           name: validated-packages
-          path: dist/x86_64
+          path: new-packages
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ github.token }}
+      - name: Merge validated packages
+        run: |
+          for package in new-packages/*.pkg.tar.zst; do
+            set -- $(pacman -Qp "$package")
+            name=$1
+            for existing in dist/x86_64/*.pkg.tar.zst; do
+              [[ -e $existing ]] || continue
+              set -- $(pacman -Qp "$existing")
+              [[ $1 == "$name" ]] && rm "$existing"
+            done
+            install -Dm644 "$package" dist/x86_64/"${package##*/}"
+          done
       - name: Import package signing key
         env:
           PACKAGER_GPG_PRIVATE_KEY: ${{ secrets.PACKAGER_GPG_PRIVATE_KEY }}
